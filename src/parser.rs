@@ -7,12 +7,47 @@ enum ParseError {
     IsInvalid,
 }
 
-pub fn check_help(args: &Vec<String>) {
+pub fn check_help(args: &Vec<String>, version: &str) {
     if args.contains(&String::from("--help")) || args.contains(&String::from("-h")) {
-        println!("*please insert help message here*");
+        println!(
+            "l1ght {}
+fence <fence@desu-mail.moe>
+A small cli for changing the backlight on a laptop.
+
+USAGE:
+    l1ght [FLAGS] [OPTIONS] ACTION
+
+FLAGS:
+    -h, --help       Prints this message.
+    -V, --version    Prints the version.
+    -p               Prints the current brightness value as a percentage.
+
+OPTIONS:
+    -i, --interface  Set a specific interface.
+
+ACTIONS:
+    nothing          Returns the current brightness value.
+    +value           Increases the current brightness value.
+    -value           Decreases the current brightness value.
+    +percentage%     Increases the current brightness value by a percentage.
+    -percentage%     Decreases the current brightness value by a percentage.
+
+EXAMPLES:
+    l1ght +50        Increases the current brightness value by 50.
+    l1ght -5%        decreases the current brightness value by 5%",
+            version
+        );
         std::process::exit(0);
     }
 }
+
+pub fn check_version(args: &Vec<String>, version: &str) {
+    if args.contains(&String::from("--version")) || args.contains(&String::from("-V")) {
+        println!("l1ght {}", version);
+        std::process::exit(0);
+    }
+}
+
 
 fn has_opperator(action: &str) -> bool {
     action.starts_with("+") || action.starts_with("+")
@@ -110,8 +145,7 @@ pub fn handle_args(interface: &Interface, args: &Vec<String>) -> bool {
     let argument: &String = args.last().unwrap();
     if argument == "-p" {
         let max = interface.get_max().clone();
-        let percentage =
-            Percentage::from_total_and_value(max, interface.brightness());
+        let percentage = Percentage::from_total_and_value(max, interface.brightness());
         println!("{}", percentage.percentage);
         return true;
     }

@@ -6,24 +6,27 @@ use std::env;
 use std::ops::Index;
 use interface::Interface;
 
+const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 
 fn get_default_interface() -> Option<Interface> {
     let interfaces = interface::get_interfaces();
 
     if  interfaces.len() < 1 {
-        // TODO some output to the user
+        println!("no backlight interface found");
         std::process::exit(1);
     }
+
     let default_interface: Interface = interfaces[0].clone();
     Some(default_interface)
 }
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    parser::check_help(&args);
+    parser::check_help(&args, VERSION);
+    parser::check_version(&args, VERSION);
 
     if args.len() >= 2 {
-        if args.contains(&String::from("-i")) {
+        if args.contains(&String::from("-i")) || args.contains(&String::from("--interface")) {
             // this is clone().clone() is wird desu
             let position = args.iter().position(|ref x| x.clone().clone() == String::from("-i")).unwrap();
             let interface = interface::get_interface(args.index(position + 1));
