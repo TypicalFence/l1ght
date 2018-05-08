@@ -1,8 +1,10 @@
 mod interface;
 mod parser;
+mod percentage;
 
 use std::env;
 use interface::Interface;
+use percentage::Percentage;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -16,6 +18,6 @@ fn main() {
         parser::handle_args(&selected_interface, &args);
     } else {
         // without any args display the current state:
-        println!("{:?}", &selected_interface.brightness());
+        println!("{}", &selected_interface.brightness());
     }
 }
