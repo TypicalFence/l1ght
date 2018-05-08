@@ -6,6 +6,7 @@ use std::io::Read;
 use std::fs::OpenOptions;
 use std::io::Write;
 
+#[derive(Clone, Debug)]
 pub struct Interface {
     path: PathBuf,
     max: i16,
@@ -22,6 +23,10 @@ impl Interface {
         max_str.pop();
         let max: i16 = max_str.parse().unwrap();
         Interface { path: p, max }
+    }
+
+    pub fn exists(&self) -> bool {
+        self.path.as_path().exists()
     }
 
     pub fn get_max(&self) -> &i16 {
@@ -89,4 +94,14 @@ pub fn get_interfaces() -> Vec<Interface> {
     }
 
     interfaces
+}
+
+pub fn get_interface(name: &String) -> Option<Interface> {
+    let mut path = PathBuf::from("/sys/class/backlight/".to_string());
+    path.push(name);
+
+    if path.as_path().exists() {
+            return Some(Interface::new(path));
+    }
+    None
 }

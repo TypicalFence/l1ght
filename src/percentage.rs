@@ -7,7 +7,6 @@ pub struct Percentage {
 impl Percentage {
     pub fn from_total_and_value(total: i16, value: i16) -> Percentage {
         let percentage_result: f32 = value as f32 / total as f32 * 100.0;
-        println!("{:?}", percentage_result);
         let percentage = percentage_result as i8;
         Percentage{total: total as i16, value: value as i16, percentage}
     }
