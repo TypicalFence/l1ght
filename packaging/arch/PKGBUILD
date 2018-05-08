@@ -1,0 +1,20 @@
+# Maintainer: fence <fence@desu-mail.moe>
+pkgname=l1ght
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="A small cli for changing the backlight on a laptop"
+url="https://github.com/TypicalFence/l1ght"
+source=("l1gth.tar.gz")
+depends=('gcc-libs')
+makedepends=('rust' 'cargo')
+arch=('i686' 'x86_64')
+license=('GPL3')
+sha512sums=(SKIP)
+
+build() {
+    cargo build --release
+}
+
+package() {
+    install -Dm755 target/release/l1ght "${pkgdir}/usr/bin/l1ght"
+}

@@ -4,4 +4,7 @@ version = "0.1.0"
 authors = ["fence <fence@desu-mail.moe>"]
 license = "GPL-3.0"
 
+[package.metadata.arch]
+pkgname = "l1ght"
+
 [dependencies]
