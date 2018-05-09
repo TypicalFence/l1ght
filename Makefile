@@ -8,8 +8,17 @@ arch_clean:
 	rm -rf  ./packaging/arch/src
 
 arch: arch_clean
-		tar -czf /tmp/l1gth.tar.gz .
-		cp /tmp/l1gth.tar.gz ./packaging/arch/
-		cd  ./packaging/arch/  && makepkg -f
-		make arch_clean
-		echo "Your package is in ./packaging/arch"
+	tar -czf /tmp/l1gth.tar.gz .
+	cp /tmp/l1gth.tar.gz ./packaging/arch/
+	cd  ./packaging/arch/  && makepkg -f
+	make arch_clean
+	echo "Your package is in ./packaging/arch"
+
+debian_clean:
+	echo "temp" > /dev/null
+
+debian: debian_clean
+	cargo deb 
+	mv target/debian/l1ght*.deb packaging/debian/
+	echo "Your packae is in ./packaging/debian"
+
