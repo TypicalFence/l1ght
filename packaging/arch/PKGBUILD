@@ -1,6 +1,6 @@
 # Maintainer: fence <fence@desu-mail.moe>
 pkgname=l1ght
-pkgver=0.1.0
+pkgver=1.0.0
 pkgrel=1
 pkgdesc="A small cli for changing the backlight on a laptop"
 url="https://github.com/TypicalFence/l1ght"
