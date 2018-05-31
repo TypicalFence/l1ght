@@ -77,7 +77,7 @@ fn get_percentage(action: &str) -> Option<i8> {
     None
 }
 
-fn get_number(action: &String) -> Result<i16, ParseError> {
+fn get_number(action: &String) -> Result<i32, ParseError> {
     let action = action.clone();
     let mut chars = action.chars();
     // skip first char (opperator)
@@ -88,7 +88,7 @@ fn get_number(action: &String) -> Result<i16, ParseError> {
         return Err(ParseError::IsPercentage);
     }
 
-    let num = num_str.parse::<i16>();
+    let num = num_str.parse::<i32>();
     if num.is_ok() {
         return Ok(num.unwrap());
     }
@@ -96,7 +96,7 @@ fn get_number(action: &String) -> Result<i16, ParseError> {
     Err(ParseError::IsInvalid)
 }
 
-fn interpret_action(interface: &Interface, action: &str, num: i16) -> bool {
+fn interpret_action(interface: &Interface, action: &str, num: i32) -> bool {
     if action.starts_with("+") {
         &interface.increase_brightness(num);
         return true;

@@ -1,19 +1,19 @@
 pub struct Percentage {
-    pub total: i16,
-    pub value: i16,
+    pub total: i32,
+    pub value: i32,
     pub percentage: i8,
 }
 
 impl Percentage {
-    pub fn from_total_and_value(total: i16, value: i16) -> Percentage {
+    pub fn from_total_and_value(total: i32, value: i32) -> Percentage {
         let percentage_result: f32 = value as f32 / total as f32 * 100.0;
         let percentage = percentage_result as i8;
-        Percentage{total: total as i16, value: value as i16, percentage}
+        Percentage{total: total as i32, value: value as i32, percentage}
     }
 
-    pub fn from_total_and_percentage(total: i16, percentage: i8) -> Percentage {
+    pub fn from_total_and_percentage(total: i32, percentage: i8) -> Percentage {
         let value = total as f32 / 100.0 * percentage as f32;
-        Percentage{total: total as i16, value: value as i16, percentage}
+        Percentage{total: total as i32, value: value as i32, percentage}
     }
 }
 

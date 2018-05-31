@@ -9,7 +9,7 @@ use std::io::Write;
 #[derive(Clone, Debug)]
 pub struct Interface {
     path: PathBuf,
-    max: i16,
+    max: i32,
 }
 
 impl Interface {
@@ -21,7 +21,7 @@ impl Interface {
         max_file.read_to_string(&mut max_str);
         // remove \n
         max_str.pop();
-        let max: i16 = max_str.parse().unwrap();
+        let max: i32 = max_str.parse().unwrap();
         Interface { path: p, max }
     }
 
@@ -29,11 +29,11 @@ impl Interface {
         self.path.as_path().exists()
     }
 
-    pub fn get_max(&self) -> &i16 {
+    pub fn get_max(&self) -> &i32 {
         &self.max
     }
 
-    pub fn brightness(&self) -> i16 {
+    pub fn brightness(&self) -> i32 {
         let mut birght_path = PathBuf::new();
         birght_path.clone_from(&self.path);
         birght_path.push("brightness");
@@ -42,11 +42,11 @@ impl Interface {
         bright_file.read_to_string(&mut bright_str);
         // remove \n
         bright_str.pop();
-        let brightness: i16 = bright_str.parse().unwrap();
+        let brightness: i32 = bright_str.parse().unwrap();
         brightness
     }
 
-    pub fn set_brightness(&self, data: i16) {
+    pub fn set_brightness(&self, data: i32) {
         let mut path = PathBuf::new();
         path.clone_from(&self.path);
         path.push("brightness");
@@ -63,7 +63,7 @@ impl Interface {
             .expect("Unable to write data");
     }
 
-    pub fn increase_brightness(&self, value: i16) {
+    pub fn increase_brightness(&self, value: i32) {
         let mut new_brightness = &self.brightness() + value;
 
         if new_brightness > self.max {
@@ -73,7 +73,7 @@ impl Interface {
         &self.set_brightness(new_brightness);
     }
 
-    pub fn decrease_brightness(&self, value: i16) {
+    pub fn decrease_brightness(&self, value: i32) {
         let mut new_brightness = &self.brightness() - value;
 
         if new_brightness < 0 {
