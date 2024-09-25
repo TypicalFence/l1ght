@@ -4,7 +4,7 @@ mod percentage;
 
 use std::env;
 use std::ops::Index;
-use interface::Interface;
+use crate::interface::Interface;
 
 const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 

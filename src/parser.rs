@@ -1,6 +1,5 @@
-use std;
-use interface::Interface;
-use percentage::Percentage;
+use crate::interface::Interface;
+use crate::percentage::Percentage;
 
 enum ParseError {
     IsPercentage,
