@@ -9,7 +9,7 @@ use crate::interface::Interface;
 const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 
 fn get_default_interface() -> Option<Interface> {
-    let interfaces = interface::get_interfaces();
+    let interfaces = interface::get_interfaces().unwrap_or(Vec::new());
 
     if  interfaces.len() < 1 {
         println!("no backlight interface found");
@@ -27,19 +27,21 @@ fn main() {
 
     if args.len() >= 2 {
         if args.contains(&String::from("-i")) || args.contains(&String::from("--interface")) {
-            // this is clone().clone() is wird desu
-            let position = args.iter().position(|ref x| x.clone().clone() == String::from("-i")).unwrap();
+            let position = args.iter().position(|ref x| x.as_str() == "-i").unwrap();
             let interface = interface::get_interface(args.index(position + 1));
 
             match interface {
-                Some(interface)  => {
-                    // is last arg
-                    if position + 1 == args.len() - 1 {
+                Some(Ok(interface))  => {
+                    if position == args.len() {
                         println!("{}", &interface.brightness());
                     } else {
                         parser::handle_args(&interface, &args);
                     }
                 },
+                Some(Err(_)) => {
+                    println!("Failed to open interface");
+                    std::process::exit(1);
+                }
                 None => {
                     println!("Unknown Interface");
                     std::process::exit(1);

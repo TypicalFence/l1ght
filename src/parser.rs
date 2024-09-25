@@ -1,5 +1,5 @@
 use crate::interface::Interface;
-use crate::percentage::Percentage;
+use crate::percentage;
 
 enum ParseError {
     IsPercentage,
@@ -47,18 +47,11 @@ pub fn check_version(args: &Vec<String>, version: &str) {
     }
 }
 
-
-fn has_opperator(action: &str) -> bool {
-    action.starts_with("+") || action.starts_with("+")
-}
-
-
 fn is_percentage(num: &str) -> bool {
     num.ends_with("%")
 }
 
 fn get_percentage(action: &str) -> Option<i8> {
-    let action = action.clone();
     let mut chars = action.chars();
     // skip first char (opperator)
     chars.next();
@@ -97,12 +90,12 @@ fn get_number(action: &String) -> Result<i32, ParseError> {
 
 fn interpret_action(interface: &Interface, action: &str, num: i32) -> bool {
     if action.starts_with("+") {
-        &interface.increase_brightness(num);
+        interface.increase_brightness(num);
         return true;
     }
 
     if action.starts_with("-") {
-        &interface.decrease_brightness(num);
+        interface.decrease_brightness(num);
         return true;
     }
 
@@ -122,11 +115,11 @@ fn change_state(interface: &Interface, args: &Vec<String>) -> bool {
                 ParseError::IsPercentage => {
                     let num = get_percentage(action);
                     if num.is_some() {
-                        let percentage = Percentage::from_total_and_percentage(
+                        let percentage = percentage::to_value(
                             interface.get_max().clone(),
                             num.unwrap(),
                         );
-                        return interpret_action(&interface, &action, percentage.value);
+                        return interpret_action(&interface, &action, percentage);
                     } else {
                         return false;
                     }
@@ -144,8 +137,8 @@ pub fn handle_args(interface: &Interface, args: &Vec<String>) -> bool {
     let argument: &String = args.last().unwrap();
     if argument == "-p" {
         let max = interface.get_max().clone();
-        let percentage = Percentage::from_total_and_value(max, interface.brightness());
-        println!("{}", percentage.percentage);
+        let percentage = percentage::from_total_and_value(max, interface.brightness());
+        println!("{}", percentage);
         return true;
     }
 
