@@ -1,11 +1,11 @@
-use std::path::PathBuf;
-use std::fs;
-use std::io;
 use std::clone::Clone;
+use std::fs;
 use std::fs::File;
-use std::io::Read;
 use std::fs::OpenOptions;
+use std::io;
+use std::io::Read;
 use std::io::Write;
+use std::path::PathBuf;
 
 #[derive(Clone, Debug)]
 pub struct Interface {
@@ -27,7 +27,15 @@ impl Interface {
     }
 
     pub fn get_name(&self) -> String {
-        self.path.clone().components().last().unwrap().as_os_str().to_str().unwrap().to_string()
+        self.path
+            .clone()
+            .components()
+            .last()
+            .unwrap()
+            .as_os_str()
+            .to_str()
+            .unwrap()
+            .to_string()
     }
 
     pub fn get_max(&self) -> i32 {
@@ -94,7 +102,7 @@ pub fn get_interfaces() -> io::Result<Vec<Interface>> {
         interfaces.push(iface);
     }
 
-   Ok(interfaces)
+    Ok(interfaces)
 }
 
 pub fn get_interface(name: &String) -> io::Result<Interface> {

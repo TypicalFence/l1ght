@@ -1,8 +1,8 @@
 mod interface;
 
+use crate::interface::Interface;
 use std::num::ParseIntError;
 use std::process::ExitCode;
-use crate::interface::Interface;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
@@ -10,7 +10,7 @@ const VERSION: &str = env!("CARGO_PKG_VERSION");
 struct Args {
     display_percentage: bool,
     interface: Option<String>,
-    action: Option<String>
+    action: Option<String>,
 }
 
 fn main() -> ExitCode {
@@ -20,9 +20,12 @@ fn main() -> ExitCode {
             eprintln!("Failed to parse Args: {}.", e);
             std::process::exit(1);
         }
-    }; 
+    };
 
-    let interface_name = match args.interface.or_else(|| get_default_interface().map(|x| x.get_name())) {
+    let interface_name = match args
+        .interface
+        .or_else(|| get_default_interface().map(|x| x.get_name()))
+    {
         Some(i) => i,
         None => {
             eprintln!("No backlight devices available on this computer!");
@@ -38,7 +41,7 @@ fn main() -> ExitCode {
         }
     };
 
-    let max= interface.get_max();
+    let max = interface.get_max();
 
     if let Some(action) = args.action {
         let number = get_number_from_action(&action);
@@ -49,7 +52,7 @@ fn main() -> ExitCode {
         }
 
         let value = match action.ends_with("%") {
-            false => {number.unwrap()},
+            false => number.unwrap(),
             true => {
                 let percentage = number.unwrap();
                 calculate_value_from_percentage(max, percentage)
@@ -79,7 +82,7 @@ fn main() -> ExitCode {
 fn get_default_interface() -> Option<Interface> {
     let interfaces = interface::get_interfaces().unwrap_or_default();
 
-    if  interfaces.is_empty() {
+    if interfaces.is_empty() {
         return None;
     }
 
@@ -88,13 +91,12 @@ fn get_default_interface() -> Option<Interface> {
 }
 
 fn get_number_from_action(action: &str) -> Result<i32, ParseIntError> {
-    let mut chars= action.chars();
+    let mut chars = action.chars();
 
     let mut peekable = chars.clone().peekable();
     let first_char = peekable.peek();
     if first_char == Some(&'+') || first_char == Some(&'-') {
         chars.next();
-        
     }
 
     let num_str = chars.as_str();
@@ -122,18 +124,19 @@ fn parse_args() -> Result<Args, pico_args::Error> {
 
     let args = Args {
         display_percentage: pargs.contains("-p"),
-        interface: pargs.opt_value_from_str("-i")?.or_else(|| pargs.opt_value_from_str("--interface").unwrap_or(None)),
+        interface: pargs
+            .opt_value_from_str("-i")?
+            .or_else(|| pargs.opt_value_from_str("--interface").unwrap_or(None)),
         action: pargs.opt_free_from_str()?,
     };
 
-    
     let _ = pargs.finish();
 
     Ok(args)
 }
 
 #[inline]
-fn calculate_percentage(total: i32, value: i32) ->  i32 {
+fn calculate_percentage(total: i32, value: i32) -> i32 {
     (value as f32 / total as f32 * 100.0) as i32
 }
 
@@ -143,12 +146,10 @@ fn calculate_value_from_percentage(total: i32, percentage: i32) -> i32 {
     value as i32
 }
 
-
-
 #[inline]
 pub fn print_help() {
     println!(
-            "l1ght {}
+        "l1ght {}
 fence <fence@desu-mail.moe>
 A small cli for changing the backlight on a laptop.
 
@@ -173,6 +174,6 @@ ACTIONS:
 EXAMPLES:
     l1ght +50        Increases the current brightness value by 50.
     l1ght -5%        decreases the current brightness value by 5%",
-           VERSION
-        );
+        VERSION
+    );
 }
