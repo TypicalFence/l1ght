@@ -1,6 +1,5 @@
 mod interface;
 mod parser;
-mod percentage;
 
 use std::env;
 use std::ops::Index;

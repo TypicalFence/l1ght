@@ -1,5 +1,4 @@
 use crate::interface::Interface;
-use crate::percentage;
 
 enum ParseError {
     IsPercentage,
@@ -115,7 +114,7 @@ fn change_state(interface: &Interface, args: &Vec<String>) -> bool {
                 ParseError::IsPercentage => {
                     let num = get_percentage(action);
                     if num.is_some() {
-                        let percentage = percentage::to_value(
+                        let percentage = calculate_value_from_percentage(
                             interface.get_max().clone(),
                             num.unwrap(),
                         );
@@ -137,7 +136,7 @@ pub fn handle_args(interface: &Interface, args: &Vec<String>) -> bool {
     let argument: &String = args.last().unwrap();
     if argument == "-p" {
         let max = interface.get_max().clone();
-        let percentage = percentage::from_total_and_value(max, interface.brightness());
+        let percentage = calculate_percentage(max, interface.brightness());
         println!("{}", percentage);
         return true;
     }
@@ -145,4 +144,13 @@ pub fn handle_args(interface: &Interface, args: &Vec<String>) -> bool {
     // no known argument was given
     // try to change the state with the argument given
     return change_state(&interface, args);
+}
+
+fn calculate_percentage(total: i32, value: i32) ->  i32 {
+    (value as f32 / total as f32 * 100.0) as i32
+}
+
+fn calculate_value_from_percentage(total: i32, percentage: i8) -> i32 {
+    let value = total as f32 / 100.0 * percentage as f32;
+    value as i32
 }
