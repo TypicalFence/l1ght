@@ -1,8 +1,9 @@
-mod interface;
+mod backlight;
 
-use crate::interface::Interface;
 use std::num::ParseIntError;
 use std::process::ExitCode;
+
+use backlight::DeviceId;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
@@ -24,7 +25,7 @@ fn main() -> ExitCode {
 
     let interface_name = match args
         .interface
-        .or_else(|| get_default_interface().map(|x| x.get_name()))
+        .or_else(|| get_default_interface().map(|x| x.0))
     {
         Some(i) => i,
         None => {
@@ -33,15 +34,13 @@ fn main() -> ExitCode {
         }
     };
 
-    let interface = match interface::get_interface(&interface_name) {
+    let interface = match backlight::open_device(backlight::DeviceId(interface_name)) {
         Ok(i) => i,
         Err(_) => {
             eprintln!("No backlight devices available on this computer!");
             std::process::exit(1);
         }
     };
-
-    let max = interface.get_max();
 
     if let Some(action) = args.action {
         let number = get_number_from_action(&action);
@@ -55,39 +54,50 @@ fn main() -> ExitCode {
             false => number.unwrap(),
             true => {
                 let percentage = number.unwrap();
-                calculate_value_from_percentage(max, percentage)
+                calculate_value_from_percentage(interface.get_max_brightness(), percentage)
             }
         };
 
         if action.starts_with("+") {
-            interface.increase_brightness(value);
+            if let Err(_) =  interface.increase_brightness(value) {
+                eprintln!("Failed to increase brightness.");
+                return ExitCode::FAILURE;
+            }
         } else if action.starts_with("-") {
-            interface.decrease_brightness(value);
+            if let Err(_) = interface.decrease_brightness(value) {
+                eprintln!("Failed to decrease brightness.");
+                return ExitCode::FAILURE;
+            }
         } else {
             eprintln!("Invalid action: {}", action);
+            return ExitCode::FAILURE;
         }
     }
 
-    let current = interface.brightness();
+    let current = interface.get_actual_brightness();
+
+    if current.is_err() {
+        eprintln!("Failed to get current brightness: {}", current.err().unwrap());
+        return ExitCode::FAILURE;
+    }
 
     if args.display_percentage {
-        println!("{}%", calculate_percentage(max, current));
+        println!("{}%", calculate_percentage(interface.get_max_brightness(), current.unwrap()));
     } else {
-        println!("{}", current);
+        println!("{}", current.unwrap());
     }
 
     ExitCode::SUCCESS
 }
 
-fn get_default_interface() -> Option<Interface> {
-    let interfaces = interface::get_interfaces().unwrap_or_default();
+fn get_default_interface() -> Option<DeviceId> {
+    let interfaces = backlight::list_devices().unwrap_or_default();
 
     if interfaces.is_empty() {
         return None;
     }
 
-    let default_interface: Interface = interfaces[0].clone();
-    Some(default_interface)
+    Some(interfaces[0].clone())
 }
 
 fn get_number_from_action(action: &str) -> Result<i32, ParseIntError> {
