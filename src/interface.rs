@@ -26,6 +26,10 @@ impl Interface {
         Ok(Interface { path: p, max })
     }
 
+    pub fn get_name(&self) -> String {
+        self.path.clone().components().last().unwrap().as_os_str().to_str().unwrap().to_string()
+    }
+
     pub fn get_max(&self) -> i32 {
         self.max
     }
@@ -54,7 +58,6 @@ impl Interface {
             .expect("oh no set");
         let mut mystr = String::new();
         let _ = opened_fie.read_to_string(&mut mystr);
-        println!("{}", mystr);
         opened_fie
             .write_all(&data.to_string().as_bytes())
             .expect("Unable to write data");
@@ -94,13 +97,13 @@ pub fn get_interfaces() -> io::Result<Vec<Interface>> {
    Ok(interfaces)
 }
 
-pub fn get_interface(name: &String) -> Option<io::Result<Interface>> {
+pub fn get_interface(name: &String) -> io::Result<Interface> {
     let mut path = PathBuf::from("/sys/class/backlight/".to_string());
     path.push(name);
 
     if path.as_path().exists() {
-        return Some(Interface::new(path));
+        return Interface::new(path);
     }
 
-    None
+    Err(io::Error::new(io::ErrorKind::NotFound, "oh no"))
 }

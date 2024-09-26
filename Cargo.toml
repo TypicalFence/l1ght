@@ -1,6 +1,6 @@
 [package]
 name = "l1ght"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 authors = ["fence <fence@desu-mail.moe>"]
 license = "GPL-3.0"
@@ -13,3 +13,4 @@ changelog = "packaging/debian/changelog"
 extended-description = "It does not rely on X."
 
 [dependencies]
+pico-args = "0.5.0"
