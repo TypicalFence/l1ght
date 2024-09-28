@@ -91,6 +91,11 @@ fn main() -> ExitCode {
                 eprintln!("Failed to decrease brightness.");
                 return ExitCode::FAILURE;
             }
+        } else if action.starts_with("=") {
+            if let Err(_) = interface.set_brightness(value) {
+                eprintln!("Failed to set brightness.");
+                return ExitCode::FAILURE;
+            }
         } else {
             eprintln!("Invalid action: {}", action);
             return ExitCode::FAILURE;
@@ -128,7 +133,7 @@ fn get_number_from_action(action: &str) -> Result<i32, ParseIntError> {
 
     let mut peekable = chars.clone().peekable();
     let first_char = peekable.peek();
-    if first_char == Some(&'+') || first_char == Some(&'-') {
+    if first_char == Some(&'+') || first_char == Some(&'-') || first_char == Some(&'=') {
         chars.next();
     }
 
@@ -203,8 +208,10 @@ OPTIONS:
 
 ACTIONS:
     nothing          Returns the current brightness value.
+    =value           Sets the current brightness value.
     +value           Increases the current brightness value.
     -value           Decreases the current brightness value.
+    =percentage%     Sets the current brightness value as a percentage.
     +percentage%     Increases the current brightness value by a percentage.
     -percentage%     Decreases the current brightness value by a percentage.
 
