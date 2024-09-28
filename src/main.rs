@@ -10,7 +10,7 @@ const VERSION: &str = env!("CARGO_PKG_VERSION");
 #[derive(Debug)]
 struct Args {
     display_percentage: bool,
-    interface: Option<String>,
+    device: Option<String>,
     action: Option<String>,
 }
 
@@ -23,9 +23,9 @@ fn main() -> ExitCode {
         }
     };
 
-    let interface_name = match args
-        .interface
-        .or_else(|| get_default_interface().map(|x| x.0))
+    let device_name = match args
+        .device
+        .or_else(|| get_default_device().map(|x| x.0))
     {
         Some(i) => i,
         None => {
@@ -34,7 +34,7 @@ fn main() -> ExitCode {
         }
     };
 
-    let interface = match backlight::open_device(backlight::DeviceId(interface_name)) {
+    let interface = match backlight::open_device(backlight::DeviceId(device_name)) {
         Ok(i) => i,
         Err(_) => {
             eprintln!("No backlight devices available on this computer!");
@@ -90,14 +90,14 @@ fn main() -> ExitCode {
     ExitCode::SUCCESS
 }
 
-fn get_default_interface() -> Option<DeviceId> {
-    let interfaces = backlight::list_devices().unwrap_or_default();
+fn get_default_device() -> Option<DeviceId> {
+    let devices = backlight::list_devices().unwrap_or_default();
 
-    if interfaces.is_empty() {
+    if devices.is_empty() {
         return None;
     }
 
-    Some(interfaces[0].clone())
+    Some(devices[0].clone())
 }
 
 fn get_number_from_action(action: &str) -> Result<i32, ParseIntError> {
@@ -134,9 +134,9 @@ fn parse_args() -> Result<Args, pico_args::Error> {
 
     let args = Args {
         display_percentage: pargs.contains("-p"),
-        interface: pargs
-            .opt_value_from_str("-i")?
-            .or_else(|| pargs.opt_value_from_str("--interface").unwrap_or(None)),
+        device: pargs
+            .opt_value_from_str("-d")?
+            .or_else(|| pargs.opt_value_from_str("--device").unwrap_or(None)),
         action: pargs.opt_free_from_str()?,
     };
 
@@ -172,7 +172,7 @@ FLAGS:
     -p               Prints the current brightness value as a percentage.
 
 OPTIONS:
-    -i, --interface  Set a specific interface.
+    -d, --device Target a specific device.
 
 ACTIONS:
     nothing          Returns the current brightness value.
