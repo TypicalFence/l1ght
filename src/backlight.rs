@@ -87,6 +87,10 @@ impl Backlight {
         })
     }
 
+    pub fn get_name(&self) -> String {
+        self.id.clone()
+    }
+
     /// Returns the maximum brightness value reported by the driver.
     pub fn get_max_brightness(&self) -> i32 {
         self.max_brightness
@@ -108,6 +112,13 @@ impl Backlight {
             backlight_path(&self.id).join(BRIGHTNESS),
             value.to_string(),
         )
+    }
+
+    #[cfg(feature = "udev")]
+    pub fn monitor(&self) -> Result<udev::MonitorSocket, io::Error> {
+        udev::MonitorBuilder::new()?
+        .match_subsystem("backlight")?
+        .listen()
     }
 
     /// Gets the actual brightness value by querying the hardware.

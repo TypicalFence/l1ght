@@ -10,6 +10,7 @@ const VERSION: &str = env!("CARGO_PKG_VERSION");
 #[derive(Debug)]
 struct Args {
     display_percentage: bool,
+    monitor: bool,
     list_devices: bool,
     output_max: bool,
     device: Option<String>,
@@ -49,7 +50,7 @@ fn main() -> ExitCode {
         }
     };
 
-    let interface = match backlight::open_device(backlight::DeviceId(device_name)) {
+    let device = match backlight::open_device(backlight::DeviceId(device_name.clone())) {
         Ok(i) => i,
         Err(_) => {
             eprintln!("No backlight devices available on this computer!");
@@ -59,7 +60,7 @@ fn main() -> ExitCode {
 
     // Printing the maximum brightness value and returning early.
     if args.output_max {
-        let max = interface.get_max_brightness();
+        let max = device.get_max_brightness();
 
         println!("{}", max);
         return ExitCode::SUCCESS;
@@ -77,22 +78,22 @@ fn main() -> ExitCode {
             false => number.unwrap(),
             true => {
                 let percentage = number.unwrap();
-                calculate_value_from_percentage(interface.get_max_brightness(), percentage)
+                calculate_value_from_percentage(device.get_max_brightness(), percentage)
             }
         };
 
         if action.starts_with("+") {
-            if let Err(_) =  interface.increase_brightness(value) {
+            if let Err(_) =  device.increase_brightness(value) {
                 eprintln!("Failed to increase brightness.");
                 return ExitCode::FAILURE;
             }
         } else if action.starts_with("-") {
-            if let Err(_) = interface.decrease_brightness(value) {
+            if let Err(_) = device.decrease_brightness(value) {
                 eprintln!("Failed to decrease brightness.");
                 return ExitCode::FAILURE;
             }
         } else if action.starts_with("=") {
-            if let Err(_) = interface.set_brightness(value) {
+            if let Err(_) = device.set_brightness(value) {
                 eprintln!("Failed to set brightness.");
                 return ExitCode::FAILURE;
             }
@@ -102,21 +103,65 @@ fn main() -> ExitCode {
         }
     }
 
-    let current = interface.get_actual_brightness();
+
+    if args.monitor {
+        return monitor_brightness(&device, args.display_percentage);
+    }
+
+    print_current_brightness(&device, args.display_percentage);
+    ExitCode::SUCCESS
+
+}
+
+fn print_current_brightness(device: &backlight::Backlight, display_percentage: bool) -> bool {
+    let current = device.get_actual_brightness();
 
     if current.is_err() {
         eprintln!("Failed to get current brightness: {}", current.err().unwrap());
-        return ExitCode::FAILURE;
+        return false;
     }
 
-    if args.display_percentage {
-        println!("{}%", calculate_percentage(interface.get_max_brightness(), current.unwrap()));
+    if display_percentage {
+        println!("{}%", calculate_percentage(device.get_max_brightness(), current.unwrap()));
     } else {
         println!("{}", current.unwrap());
     }
 
+    return true;
+}
+
+#[cfg(feature = "udev")]
+fn monitor_brightness(device: &backlight::Backlight, display_percentage: bool) -> ExitCode {
+    eprintln!("Monitoring brightness changes. Press Ctrl+C to exit.");
+
+    print_current_brightness(&device, display_percentage);
+
+    if let Ok(socket) = device.monitor() {
+        let device_name = device.get_name();
+        let mut iter = socket.iter();
+        loop {
+            iter.next().map(|event| {
+                match  event.event_type() {
+                    udev::EventType::Change => {
+                        if event.device().sysname().to_string_lossy() == device_name {
+                            print_current_brightness(&device, display_percentage);
+                        }
+                    },
+                    _ => {}
+                } 
+            });
+        }
+    }
+
     ExitCode::SUCCESS
 }
+
+#[cfg(not(feature = "udev"))]
+fn monitor_brightness(_device: &backlight::Backlight, _display_percentage: bool) -> ExitCode {
+    eprintln!("Monitoring requires udev.");
+    ExitCode::FAILURE
+}
+
 
 fn get_default_device() -> Option<DeviceId> {
     let devices = backlight::list_devices().unwrap_or_default();
@@ -162,8 +207,9 @@ fn parse_args() -> Result<Args, pico_args::Error> {
 
     let args = Args {
         display_percentage: pargs.contains("-p"),
+        monitor: pargs.contains(["-M", "--monitor"]),
         list_devices: pargs.contains(["-l", "--list"]),
-        output_max: pargs.contains("--max"),
+        output_max: pargs.contains(["-m", "--max"]),
         device: pargs
             .opt_value_from_str("-d")?
             .or_else(|| pargs.opt_value_from_str("--device").unwrap_or(None)),
@@ -201,7 +247,8 @@ FLAGS:
     -V, --version    Prints the version.
     -p               Prints the current brightness value as a percentage.
     -l, --list       Lists all available devices.
-    --max            Prints the maximum brightness value.
+    -m, --max        Prints the maximum brightness value.
+    -M, --monitor    Monitors the brightness for changes.
 
 OPTIONS:
     -d, --device Target a specific device.
