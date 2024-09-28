@@ -10,6 +10,7 @@ const VERSION: &str = env!("CARGO_PKG_VERSION");
 #[derive(Debug)]
 struct Args {
     display_percentage: bool,
+    list_devices: bool,
     device: Option<String>,
     action: Option<String>,
 }
@@ -22,6 +23,16 @@ fn main() -> ExitCode {
             std::process::exit(1);
         }
     };
+
+    if args.list_devices {
+        let devices = backlight::list_devices().unwrap_or_default();
+
+        for device in devices {
+            println!("{}", device.0);
+        }
+
+        return ExitCode::SUCCESS;
+    }
 
     let device_name = match args
         .device
@@ -134,6 +145,7 @@ fn parse_args() -> Result<Args, pico_args::Error> {
 
     let args = Args {
         display_percentage: pargs.contains("-p"),
+        list_devices: pargs.contains(["-l", "--list"]),
         device: pargs
             .opt_value_from_str("-d")?
             .or_else(|| pargs.opt_value_from_str("--device").unwrap_or(None)),
@@ -170,6 +182,7 @@ FLAGS:
     -h, --help       Prints this message.
     -V, --version    Prints the version.
     -p               Prints the current brightness value as a percentage.
+    -l, --list       Lists all available devices.
 
 OPTIONS:
     -d, --device Target a specific device.
