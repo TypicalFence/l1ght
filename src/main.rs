@@ -11,6 +11,7 @@ const VERSION: &str = env!("CARGO_PKG_VERSION");
 struct Args {
     display_percentage: bool,
     list_devices: bool,
+    output_max: bool,
     device: Option<String>,
     action: Option<String>,
 }
@@ -24,6 +25,8 @@ fn main() -> ExitCode {
         }
     };
 
+
+    // Listing all devices and returning early.
     if args.list_devices {
         let devices = backlight::list_devices().unwrap_or_default();
 
@@ -33,6 +36,7 @@ fn main() -> ExitCode {
 
         return ExitCode::SUCCESS;
     }
+    
 
     let device_name = match args
         .device
@@ -52,6 +56,14 @@ fn main() -> ExitCode {
             std::process::exit(1);
         }
     };
+
+    // Printing the maximum brightness value and returning early.
+    if args.output_max {
+        let max = interface.get_max_brightness();
+
+        println!("{}", max);
+        return ExitCode::SUCCESS;
+    }
 
     if let Some(action) = args.action {
         let number = get_number_from_action(&action);
@@ -146,6 +158,7 @@ fn parse_args() -> Result<Args, pico_args::Error> {
     let args = Args {
         display_percentage: pargs.contains("-p"),
         list_devices: pargs.contains(["-l", "--list"]),
+        output_max: pargs.contains("--max"),
         device: pargs
             .opt_value_from_str("-d")?
             .or_else(|| pargs.opt_value_from_str("--device").unwrap_or(None)),
@@ -183,6 +196,7 @@ FLAGS:
     -V, --version    Prints the version.
     -p               Prints the current brightness value as a percentage.
     -l, --list       Lists all available devices.
+    --max            Prints the maximum brightness value.
 
 OPTIONS:
     -d, --device Target a specific device.
