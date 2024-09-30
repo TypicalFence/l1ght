@@ -1,0 +1,131 @@
+.TH l1ght 1 "October 2024" fence "User manual"
+.SH NAME
+l1ght - Brigthness control
+
+.SH SYNOPSIS
+.SY l1ght
+.OP \-p
+.OP \-d DEVICE
+.OP \--monitor
+.RI [ ACTION ]
+.SY l1ght
+.OP \-p
+.OP \-d DEVICE
+.B \--max
+.SY l1ght
+.B \--list
+.OP \--help
+.OP \--version
+.YS
+
+.SH DESCRIPTION
+.B l1ght 
+lets you control backlight devices. 
+.br
+It is mainly intended for laptops, but drivers for external monitors do exist.
+.br
+It can be used with any device exposed to 
+.IR /sys/class/backlight .
+
+When run without any arguments it will output the current brightness value of the default device.
+
+Additionally it accepts an 
+.I ACTION
+which can either increase, decrease or set the current brightness.
+
+.SH ACTIONS
+
+.TP 
+.BI + $VAL
+Increases the brightness by
+.IR $VAL .
+
+.TP
+.BI - $VAL
+Decrease the brightness by
+.IR $VALUE .
+
+.TP
+.BI = $VAL
+Sets the brightness to 
+.IR $VAL .
+
+.TP 
+.BI + $VAL %
+Increases the brightness by
+.IR $VAL 
+in percentage.
+
+.TP
+.BI - $VAL %
+Decrease the brightness by
+.IR $VAL 
+in percentage.
+
+.TP
+.BI = $VAL %
+Sets the brightness to 
+.IR $VAL 
+in percentage.
+
+.SH OPTIONS
+.SS Generic Program Information
+
+.TP
+
+.BR -V ", " --version
+Outputs the version of 
+.BR l1ght .
+
+.TP
+.BR -h ", " --help
+Outputs a usage message.
+
+.SS Subcommands
+
+.TP
+.BR -l ", " --list
+Outputs a list of all available backlight devices on the system.
+
+.TP
+.BR -m ", " --max
+Outputs the maximum brightness value of the targeted device.
+
+.SS Options
+.TP
+.B -p
+Output brightness as a percentage (without a % symbol)
+
+.TP
+.BI \-d " NAME" "\fR,\fP --device " NAME
+Target a specific backlight device.
+
+The system running the command might have more than one display which exposes brightness controls.
+
+.TP
+.BR -M ", " --monitor
+Keep monitoring the device for changes in brightness.
+
+Updated values will be printed to Standard Output on every change.
+
+This feature requires udev.
+
+.SH EXAMPLES
+
+.IP l1ght\ -p 
+Displays the current brightness of the default device in percentage.
+
+.IP l1ght\ +10%
+Increases the brightness of the default device by 10 percent.
+
+.IP l1ght\ -20
+Decreases the brightness of the default device by 10.
+
+.IP l1ght\ -d amdgpu_bl2\ =60%
+Sets the brightness of the device "amdgpu_bl2" to 60 percent.
+
+.SH AUTHOR
+Written by fence.
+
+.SH HISTORY
+The program was originally written in May 2018 and has been maintain since.

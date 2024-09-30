@@ -1,4 +1,3 @@
-
 main:
 	echo "The Makefile is meant for packaging"
 
@@ -13,12 +12,3 @@ arch: arch_clean
 	cd  ./packaging/arch/  && makepkg -f
 	make arch_clean
 	echo "Your package is in ./packaging/arch"
-
-debian_clean:
-	echo "temp" > /dev/null
-
-debian: debian_clean
-	cargo deb 
-	mv target/debian/l1ght*.deb packaging/debian/
-	echo "Your packae is in ./packaging/debian"
-
