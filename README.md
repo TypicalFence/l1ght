@@ -39,10 +39,3 @@ This code is licensed under GPL3.
 
 Please refer to the "LICENSE" file for details.
 
-
-### Packaging
-You can build packages, for your platform yourself.
-Currently the Packaging is done for Debian and Arch Linux.
-Alternatively you could also install it via `cargo install`, but this only makes the program available for your user.
-For building a package of your choice call `make arch` or `make debian`.
-The debian packaging depends on cargo-deb for now, so just install that via cargo for building it. 
